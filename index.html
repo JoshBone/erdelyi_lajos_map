@@ -1,12 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Leaflet Map from Google Sheet</title>
+  <title>Leaflet Map with Marker Clustering</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link 
-    rel="stylesheet" 
+  <link
+    rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
   />
   <style>
     #map { height: 100vh; width: 100%; }
@@ -16,36 +24,714 @@
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-  <script>
-    const SHEET_ID = "15EZP1lnOi2ZewIRaTBWgD_n3qp6UBjZ-sG6LAre7PVY";
-    const SHEET_NAME = 'Sheet1'; // Use your actual tab name here
-    const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
-    const map = L.map('map').setView([20, 0], 2);
+  <script>
+    const locations = [
+ {
+   "name": "Abrudbánya",
+   "latitude": 46.2746751,
+   "longitude": 23.0650287
+ },
+ {
+   "name": "Adamclisi",
+   "latitude": 44.0834392,
+   "longitude": 27.9546542
+ },
+ {
+   "name": "Aknasugatag",
+   "latitude": 47.7813212,
+   "longitude": 23.9394772
+ },
+ {
+   "name": "Amsterdam",
+   "latitude": 52.3730796,
+   "longitude": 4.8924534
+ },
+ {
+   "name": "Apáca",
+   "latitude": 45.950432,
+   "longitude": 25.5331162
+ },
+ {
+   "name": "Árkos",
+   "latitude": 45.9007801,
+   "longitude": 25.7754359
+ },
+ {
+   "name": "Avas",
+   "latitude": 48.0971932,
+   "longitude": 20.7722059
+ },
+ {
+   "name": "Balatonrendes",
+   "latitude": 46.8273773,
+   "longitude": 17.5857978
+ },
+ {
+   "name": "Balázsfalva",
+   "latitude": 46.1741571,
+   "longitude": 23.9224826
+ },
+ {
+   "name": "Barót",
+   "latitude": 46.0751919,
+   "longitude": 25.5996242
+ },
+ {
+   "name": "Bereck",
+   "latitude": 46.0442336,
+   "longitude": 26.3021371
+ },
+ {
+   "name": "Beszterce",
+   "latitude": 47.133333,
+   "longitude": 24.483333
+ },
+ {
+   "name": "Betlen",
+   "latitude": 45.8315581,
+   "longitude": 24.9230964
+ },
+ {
+   "name": "Bölön",
+   "latitude": 45.9335226,
+   "longitude": 25.5694691
+ },
+ {
+   "name": "Borsa",
+   "latitude": 47.6554079,
+   "longitude": 24.6639308
+ },
+ {
+   "name": "Borszék",
+   "latitude": 46.9639588,
+   "longitude": 25.5609031
+ },
+ {
+   "name": "Bözöd",
+   "latitude": 46.4062796,
+   "longitude": 24.9228488
+ },
+ {
+   "name": "Brassó",
+   "latitude": 45.6525105,
+   "longitude": 25.6105654
+ },
+ {
+   "name": "Budapest",
+   "latitude": 47.4813896,
+   "longitude": 19.1460941
+ },
+ {
+   "name": "Bukarest",
+   "latitude": 44.4378654,
+   "longitude": 26.0863631
+ },
+ {
+   "name": "Calarasi",
+   "latitude": 44.1961646,
+   "longitude": 27.3313233
+ },
+ {
+   "name": "Campulung",
+   "latitude": 45.2697704,
+   "longitude": 25.0438643
+ },
+ {
+   "name": "Csíkszereda",
+   "latitude": 46.3614042,
+   "longitude": 25.8026675
+ },
+ {
+   "name": "Csombord",
+   "latitude": 46.3080965,
+   "longitude": 23.762224
+ },
+ {
+   "name": "Deda",
+   "latitude": 46.947477,
+   "longitude": 24.8717651
+ },
+ {
+   "name": "Dés",
+   "latitude": 47.1426672,
+   "longitude": 23.8759884
+ },
+ {
+   "name": "Detunata",
+   "latitude": 46.2778343,
+   "longitude": 23.1982803
+ },
+ {
+   "name": "Disznajó",
+   "latitude": 46.8927438,
+   "longitude": 24.7979259
+ },
+ {
+   "name": "Dobrudzsa",
+   "latitude": 44.45,
+   "longitude": 28.333333
+ },
+ {
+   "name": "Dörnau",
+   "latitude": 47.013629,
+   "longitude": 23.504124
+ },
+ {
+   "name": "Enyed",
+   "latitude": 46.34801,
+   "longitude": 23.6377869
+ },
+ {
+   "name": "Erdőcsinád",
+   "latitude": 46.6405316,
+   "longitude": 24.7162472
+ },
+ {
+   "name": "Erdőszentgyörgy",
+   "latitude": 46.4314439,
+   "longitude": 24.8421705
+ },
+ {
+   "name": "Farkaslaka",
+   "latitude": 46.3800055,
+   "longitude": 25.2200378
+ },
+ {
+   "name": "Fehéregyháza",
+   "latitude": 46.2395271,
+   "longitude": 24.8500258
+ },
+ {
+   "name": "Félixfürdő",
+   "latitude": 46.9896227,
+   "longitude": 21.9812623
+ },
+ {
+   "name": "Felsőoroszi",
+   "latitude": 46.7062229,
+   "longitude": 24.9110872
+ },
+ {
+   "name": "Felvinc",
+   "latitude": 46.4021876,
+   "longitude": 23.811558
+ },
+ {
+   "name": "Galac",
+   "latitude": 45.4338215,
+   "longitude": 28.0549395
+ },
+ {
+   "name": "Gernyeszeg",
+   "latitude": 46.6730606,
+   "longitude": 24.645497
+ },
+ {
+   "name": "Gyergyószárhegy",
+   "latitude": 46.7460218,
+   "longitude": 25.5326726
+ },
+ {
+   "name": "Gyergyószentmiklós",
+   "latitude": 46.7213467,
+   "longitude": 25.5998915
+ },
+ {
+   "name": "Gyulakuta",
+   "latitude": 46.4214411,
+   "longitude": 24.768976
+ },
+ {
+   "name": "Harina",
+   "latitude": 47.0203355,
+   "longitude": 24.4144269
+ },
+ {
+   "name": "Hermány",
+   "latitude": 45.779167,
+   "longitude": 24.280556
+ },
+ {
+   "name": "Iasi",
+   "latitude": 47.1615598,
+   "longitude": 27.5837814
+ },
+ {
+   "name": "Kalotaszeg",
+   "latitude": 46.8,
+   "longitude": 23.1333
+ },
+ {
+   "name": "Kányád",
+   "latitude": 46.2130074,
+   "longitude": 25.2416106
+ },
+ {
+   "name": "Karácsonyfalva",
+   "latitude": 46.1821915,
+   "longitude": 25.4327586
+ },
+ {
+   "name": "Kézdivásárhely",
+   "latitude": 46.0007042,
+   "longitude": 26.1373615
+ },
+ {
+   "name": "Kisjenő",
+   "latitude": 46.5242228,
+   "longitude": 21.5179314
+ },
+ {
+   "name": "Kökös",
+   "latitude": 45.783333,
+   "longitude": 25.8
+ },
+ {
+   "name": "Kolozsvár",
+   "latitude": 46.769379,
+   "longitude": 23.5899542
+ },
+ {
+   "name": "Komandó",
+   "latitude": 45.7586792,
+   "longitude": 26.2745216
+ },
+ {
+   "name": "Konstanza",
+   "latitude": 44.1767161,
+   "longitude": 28.6507598
+ },
+ {
+   "name": "Korond",
+   "latitude": 46.4710902,
+   "longitude": 25.1836329
+ },
+ {
+   "name": "Kovászna",
+   "latitude": 45.8448991,
+   "longitude": 26.1693108
+ },
+ {
+   "name": "Kutyfalva",
+   "latitude": 46.4642687,
+   "longitude": 24.1562257
+ },
+ {
+   "name": "Lapád",
+   "latitude": 46.289722,
+   "longitude": 23.818889
+ },
+ {
+   "name": "Lekence",
+   "latitude": 47.019444,
+   "longitude": 24.333611
+ },
+ {
+   "name": "Lenauheim",
+   "latitude": 45.8719408,
+   "longitude": 20.7994504
+ },
+ {
+   "name": "London",
+   "latitude": 51.5074456,
+   "longitude": -0.1277653
+ },
+ {
+   "name": "Ludas",
+   "latitude": 47.7334096,
+   "longitude": 20.0927852
+ },
+ {
+   "name": "Lupeny",
+   "latitude": 45.3552327,
+   "longitude": 23.2157411
+ },
+ {
+   "name": "Majszén",
+   "latitude": 47.653981,
+   "longitude": 24.550684
+ },
+ {
+   "name": "Makkfalva",
+   "latitude": 46.5,
+   "longitude": 24.916667
+ },
+ {
+   "name": "Malomfalva",
+   "latitude": 46.4893785,
+   "longitude": 24.4399402
+ },
+ {
+   "name": "Máréfalva",
+   "latitude": 46.3413963,
+   "longitude": 25.3838472
+ },
+ {
+   "name": "Marosfő",
+   "latitude": 46.6268701,
+   "longitude": 25.682584
+ },
+ {
+   "name": "Maroshévíz",
+   "latitude": 46.9241232,
+   "longitude": 25.352455
+ },
+ {
+   "name": "Marosludas",
+   "latitude": 46.4833006,
+   "longitude": 24.0950842
+ },
+ {
+   "name": "Marosszentgyörgy",
+   "latitude": 46.5764335,
+   "longitude": 24.6042074
+ },
+ {
+   "name": "Marosújvár",
+   "latitude": 46.3814028,
+   "longitude": 23.8577354
+ },
+ {
+   "name": "Marosvásárhely",
+   "latitude": 46.5446253,
+   "longitude": 24.561196
+ },
+ {
+   "name": "Marosvécs",
+   "latitude": 46.8571245,
+   "longitude": 24.7613032
+ },
+ {
+   "name": "Medgyes",
+   "latitude": 46.1625212,
+   "longitude": 24.3473855
+ },
+ {
+   "name": "Mexikóváros",
+   "latitude": 19.3207722,
+   "longitude": -99.1514678
+ },
+ {
+   "name": "Mezőfele",
+   "latitude": 46.6512498,
+   "longitude": 24.4868031
+ },
+ {
+   "name": "Mezősály",
+   "latitude": 46.63,
+   "longitude": 24.22
+ },
+ {
+   "name": "Mezőzáh",
+   "latitude": 46.6160828,
+   "longitude": 24.1254379
+ },
+ {
+   "name": "Mikháza",
+   "latitude": 46.629819,
+   "longitude": 24.8777227
+ },
+ {
+   "name": "Moráreni",
+   "latitude": 46.9243585,
+   "longitude": 24.8313863
+ },
+ {
+   "name": "Nagybacon",
+   "latitude": 46.1025099,
+   "longitude": 25.7447319
+ },
+ {
+   "name": "Nagybánya",
+   "latitude": 47.6565584,
+   "longitude": 23.5719843
+ },
+ {
+   "name": "Nagydisznód",
+   "latitude": 45.7168421,
+   "longitude": 24.1546237
+ },
+ {
+   "name": "Nagyenyed",
+   "latitude": 46.3108893,
+   "longitude": 23.7188181
+ },
+ {
+   "name": "Nagykend",
+   "latitude": 46.387071,
+   "longitude": 24.7306896
+ },
+ {
+   "name": "Nagyvárad",
+   "latitude": 47.0549163,
+   "longitude": 21.9285231
+ },
+ {
+   "name": "Náznánfalva",
+   "latitude": 46.5355198,
+   "longitude": 24.5020998
+ },
+ {
+   "name": "New York",
+   "latitude": 40.7127281,
+   "longitude": -74.0060152
+ },
+ {
+   "name": "Nyárád",
+   "latitude": 47.2829876,
+   "longitude": 17.3611691
+ },
+ {
+   "name": "Ózd",
+   "latitude": 48.2239095,
+   "longitude": 20.2895983
+ },
+ {
+   "name": "Paks",
+   "latitude": 46.6229468,
+   "longitude": 18.8589364
+ },
+ {
+   "name": "Palotaiva",
+   "latitude": 46.95,
+   "longitude": 25.1
+ },
+ {
+   "name": "Parajd",
+   "latitude": 46.553075,
+   "longitude": 25.1249278
+ },
+ {
+   "name": "Párizs",
+   "latitude": 48.8588897,
+   "longitude": 2.320041
+ },
+ {
+   "name": "Pitesti",
+   "latitude": 44.8572343,
+   "longitude": 24.8719422
+ },
+ {
+   "name": "Pusztakamarás",
+   "latitude": 46.7982763,
+   "longitude": 24.1427948
+ },
+ {
+   "name": "Radnót",
+   "latitude": 48.3428026,
+   "longitude": 20.2051722
+ },
+ {
+   "name": "Ratosnya",
+   "latitude": 46.9723514,
+   "longitude": 24.9929438
+ },
+ {
+   "name": "Sárpatak",
+   "latitude": 46.1721191,
+   "longitude": 24.8564329
+ },
+ {
+   "name": "Segesvár",
+   "latitude": 46.2202037,
+   "longitude": 24.7934483
+ },
+ {
+   "name": "Sepsiszentgyörgy",
+   "latitude": 45.8659935,
+   "longitude": 25.7865367
+ },
+ {
+   "name": "Siegendorf",
+   "latitude": 47.7803088,
+   "longitude": 16.5414018
+ },
+ {
+   "name": "Sinaia",
+   "latitude": 45.3454687,
+   "longitude": 25.5481055
+ },
+ {
+   "name": "Sófalva",
+   "latitude": 47.0763217,
+   "longitude": 24.4374037
+ },
+ {
+   "name": "Sóskút",
+   "latitude": 47.4047185,
+   "longitude": 18.8305621
+ },
+ {
+   "name": "Sóvárad",
+   "latitude": 46.5619751,
+   "longitude": 25.0102902
+ },
+ {
+   "name": "Stockholm",
+   "latitude": 59.3251172,
+   "longitude": 18.0710935
+ },
+ {
+   "name": "Suceava",
+   "latitude": 47.5326534,
+   "longitude": 25.8345939
+ },
+ {
+   "name": "Szabéd",
+   "latitude": 46.6644823,
+   "longitude": 24.4465483
+ },
+ {
+   "name": "Szalonta",
+   "latitude": 46.8,
+   "longitude": 21.65
+ },
+ {
+   "name": "Szárhegy",
+   "latitude": 48.3941248,
+   "longitude": 21.6404534
+ },
+ {
+   "name": "Szászmedgyes",
+   "latitude": 46.163889,
+   "longitude": 24.350833
+ },
+ {
+   "name": "Szászrégen",
+   "latitude": 46.7796886,
+   "longitude": 24.7000238
+ },
+ {
+   "name": "Szatmár",
+   "latitude": 48.0297821,
+   "longitude": 22.0040108
+ },
+ {
+   "name": "Székelyderzs",
+   "latitude": 46.2007316,
+   "longitude": 25.1988858
+ },
+ {
+   "name": "Székelykeresztúr",
+   "latitude": 46.2886141,
+   "longitude": 25.0305249
+ },
+ {
+   "name": "Székelyszenterzsébet",
+   "latitude": 46.2925271,
+   "longitude": 24.9372295
+ },
+ {
+   "name": "Székelyudvarhely",
+   "latitude": 46.3047462,
+   "longitude": 25.2950261
+ },
+ {
+   "name": "Szováta",
+   "latitude": 46.5971683,
+   "longitude": 25.07328
+ },
+ {
+   "name": "Tancs",
+   "latitude": 46.7802525,
+   "longitude": 24.5520134
+ },
+ {
+   "name": "Teke",
+   "latitude": 46.910538,
+   "longitude": 24.506506
+ },
+ {
+   "name": "Temesvár",
+   "latitude": 45.759722,
+   "longitude": 21.23
+ },
+ {
+   "name": "Torda",
+   "latitude": 46.5685214,
+   "longitude": 23.7853643
+ },
+ {
+   "name": "Tordaharasztos",
+   "latitude": 46.466667,
+   "longitude": 23.85
+ },
+ {
+   "name": "Torockó",
+   "latitude": 46.4531027,
+   "longitude": 23.5676421
+ },
+ {
+   "name": "Tulcea",
+   "latitude": 45.177518,
+   "longitude": 28.8016348
+ },
+ {
+   "name": "Udvarfalva",
+   "latitude": 46.594767,
+   "longitude": 24.5733417
+ },
+ {
+   "name": "Vama Veche",
+   "latitude": 43.7524566,
+   "longitude": 28.5723649
+ },
+ {
+   "name": "Vargyas",
+   "latitude": 46.1277766,
+   "longitude": 25.5567391
+ },
+ {
+   "name": "Vatra-Guga",
+   "latitude": 47.274488,
+   "longitude": 23.830983
+ },
+ {
+   "name": "Vécs",
+   "latitude": 47.807866,
+   "longitude": 20.1673321
+ },
+ {
+   "name": "Visó",
+   "latitude": 47.9125,
+   "longitude": 24.14555
+ },
+ {
+   "name": "Vlahica",
+   "latitude": 43.6651321,
+   "longitude": 18.9138036
+ },
+ {
+   "name": "Zernest",
+   "latitude": 45.5607354,
+   "longitude": 25.3161793
+ },
+ {
+   "name": "Zsögöd",
+   "latitude": 46.340709,
+   "longitude": 25.808095
+ }
+];
+
+    const map = L.map('map').setView([46.0, 25.0], 7); // Romania center
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    fetch(URL)
-      .then(response => response.text())
-      .then(text => {
-        // Strip off Google Sheets JS wrapper
-        const json = JSON.parse(text.substring(47).slice(0, -2));
-        const rows = json.table.rows;
+    const markers = L.markerClusterGroup();
 
-        rows.forEach(row => {
-          const name = row.c[0]?.v;
-          const lat = parseFloat(row.c[1]?.v);
-          const lon = parseFloat(row.c[2]?.v);
+    locations.forEach(loc => {
+      if (!isNaN(loc.latitude) && !isNaN(loc.longitude)) {
+        const marker = L.marker([loc.latitude, loc.longitude])
+          .bindPopup(`<b>${loc.name}</b>`);
+        markers.addLayer(marker);
+      }
+    });
 
-          if (!isNaN(lat) && !isNaN(lon)) {
-            L.marker([lat, lon])
-              .addTo(map)
-              .bindPopup(`<b>${name}</b>`);
-          }
-        });
-      });
+    map.addLayer(markers);
   </script>
 </body>
 </html>
